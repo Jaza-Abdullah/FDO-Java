@@ -117,8 +117,14 @@ class FDOSingleObjective {
                     ArrayList lastPace = new ArrayList();
                     double fitnessWeight = 0.0;
                     if (bee.getBeeFitness(functionName) != 0) {
-                        //generate fitness weight fW
-                        fitnessWeight = (getBestBee(scouts).getBeeFitness(functionName) / bee.getBeeFitness(functionName)) - weightFactor;
+                         //generate fitness weight fW
+                        double bbf = getBestBee(scouts).getBeeFitness(functionName);
+                        double cbf = bee.getBeeFitness(functionName);
+                        if (bbf < (0.05 * cbf)) {
+                            fitnessWeight = 0.2;
+                        } else {
+                            fitnessWeight = (getBestBee(scouts).getBeeFitness(functionName) / bee.getBeeFitness(functionName)) - weightFactor;
+                        }
                     }
                     for (int dim = 0; dim < dimenssion; dim++) {
                         double distanceFromBestBee = (double) bestBeeXis.get(dim) - (double) bee.getXis().get(dim);
@@ -169,30 +175,29 @@ class FDOSingleObjective {
                             bee.setXis(tempXs);
                             cpace++;
                             isCnon = false;
-                        }
-                    } else {
-                        tempXs.clear();
-                        for (int m = 0; m < dimenssion; m++) {
-                            for (int n = 0; n < dimenssion; n++) {
-                                double r = simpleRandomWalk();
-                                double x = (double) bee.getXis().get(n) + (double) bee.getXis().get(n) * r;
+                        }else {
+                           tempXs.clear();
+                           for (int m = 0; m < dimenssion; m++) {
+                               for (int n = 0; n < dimenssion; n++) {
+                                   double r = simpleRandomWalk();
+                                   double x = (double) bee.getXis().get(n) + (double) bee.getXis().get(n) * r;
 
-                                if (agentRemainInsideBoundery) {
-                                    x = getIntoBounderyLimit(x);
-                                }
-                                tempXs.add(x);
-                            }
-                        }
-                        tempBee = new Bee(tempXs, 0, func);
-                        //use < for minimization problem and > for maximization
-                        if (tempBee.getBeeFitness(functionName) < bee.getBeeFitness(functionName)) {
-                            bee.setXis(tempXs);
-                            cdis++;
-                            isCnon = false;
-                            break;
-                        }
-
-                    }
+                                   if (agentRemainInsideBoundery) {
+                                       x = getIntoBounderyLimit(x);
+                                   }
+                                   tempXs.add(x);
+                               }
+                           }
+                           tempBee = new Bee(tempXs, 0, func);
+                           //use < for minimization problem and > for maximization
+                           if (tempBee.getBeeFitness(functionName) < bee.getBeeFitness(functionName)) {
+                               bee.setXis(tempXs);
+                               cdis++;
+                               isCnon = false;
+                               break;
+                           }
+                       }
+                    } 
                     if (shouldPrintEveryBee) {
                         printBee(bee);
                     }
